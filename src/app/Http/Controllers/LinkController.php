@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\LinkIsExpired;
-use App\Http\Requests\HashUrlRequest;
 use App\Http\Resources\LinkHashResource;
-use App\Http\Resources\LinkResource;
 use App\Http\Resources\LinkUrlResource;
 use App\Interfaces\ILinkRepository;
-use App\Models\Link;
+use App\Services\Link\CreateHashLinkService;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Str;
 
 class LinkController extends Controller
@@ -23,22 +23,16 @@ class LinkController extends Controller
     /**
      * @throws LinkIsExpired
      */
-    public function toHash(Request $request)
+    public function toHash(Request $request, CreateHashLinkService $service): LinkHashResource
     {
-        $link = $this->repository->firstOrCreate($request->get('url'), [
-            "url" => $request->get('url'),
-            "hash" => Str::random(5)
-        ]);
-        if ($link->isExpired()) {
-            throw new LinkIsExpired("Ссылка устарела");
-        }
+        $link = $service->run($request->get('url'));
         return new LinkHashResource($link);
     }
 
     /**
      * @throws LinkIsExpired
      */
-    public function getUrl(string $hash)
+    public function getUrl(string $hash): LinkUrlResource
     {
         $link = $this->repository->findHash($hash);
         if (!$link || $link->isExpired()) {
@@ -47,15 +41,17 @@ class LinkController extends Controller
         return new LinkUrlResource($link);
     }
 
-    public function redirectUrl(string $hash)
+    /**
+     * @throws LinkIsExpired
+     */
+    public function redirectUrl(string $hash): Application|Redirector|RedirectResponse
     {
         if (!$this->repository->findHash($hash)) {
             abort(404);
         }
         return redirect($this->getUrl($hash)->url);
     }
-
-    public function searchUrl(string $url)
+    public function searchUrl(string $url): LinkHashResource
     {
         $link = $this->repository->firstOrCreate($url, [
             "url"   => $url,
@@ -63,9 +59,8 @@ class LinkController extends Controller
         ]);
         return new LinkHashResource($link);
     }
-
-    public function links()
-    {
-        return response()->json(Link::all());
-    }
+//    public function links()
+//    {
+//        return response()->json(Link::all());
+//    }
 }

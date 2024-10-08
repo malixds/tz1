@@ -24,8 +24,6 @@ class SendLinks extends Command
             if ($response->successful()) {
                 $link->sent = true;
                 $link->save();
-            } else {
-                $this->error("Failed to send: {$link->url}");
             }
         }
         $this->info('все ок');

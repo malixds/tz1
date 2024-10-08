@@ -12,7 +12,7 @@ class Link extends Model
     protected $fillable = ['url', 'hash'];
 
 
-    public function isExpired()
+    public function isExpired(): bool
     {
         return $this->created_at->diffInDays(now()) > 7;
     }
