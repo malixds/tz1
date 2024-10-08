@@ -6,6 +6,7 @@ use App\Exceptions\LinkIsExpired;
 use App\Http\Resources\LinkHashResource;
 use App\Http\Resources\LinkUrlResource;
 use App\Interfaces\ILinkRepository;
+use App\Models\Link;
 use App\Services\Link\CreateHashLinkService;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
@@ -59,8 +60,8 @@ class LinkController extends Controller
         ]);
         return new LinkHashResource($link);
     }
-//    public function links()
-//    {
-//        return response()->json(Link::all());
-//    }
+    public function links()
+    {
+        return response()->json(Link::all());
+    }
 }

@@ -13,7 +13,7 @@ class SendLinks extends Command
 
     public function handle()
     {
-        $endpoint = config('app.links_endpoint');
+        $endpoint = config('links.links_endpoint');
         $links = Link::query()->where('sent', false)->get();
         foreach ($links as $link) {
             $response = Http::post($endpoint, [
