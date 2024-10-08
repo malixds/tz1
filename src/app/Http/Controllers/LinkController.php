@@ -23,28 +23,31 @@ class LinkController extends Controller
     /**
      * @throws LinkIsExpired
      */
-    public function toHash(Request $request) // если она уже есть, то не нужно создавать хэш
+    public function toHash(Request $request)
     {
         $link = $this->repository->firstOrCreate($request->get('url'), [
             "url" => $request->get('url'),
             "hash" => Str::random(5)
         ]);
         if ($link->isExpired()) {
-            throw new LinkIsExpired(404);
+            throw new LinkIsExpired("Ссылка устарела");
         }
         return new LinkHashResource($link);
     }
 
-    public function getUrl(string $hash) // обработать логику если не соответствует такому хэшу
+    /**
+     * @throws LinkIsExpired
+     */
+    public function getUrl(string $hash)
     {
         $link = $this->repository->findHash($hash);
         if (!$link || $link->isExpired()) {
-            abort(404);
+            throw new LinkIsExpired("Ссылка устарела или не найдена");
         }
         return new LinkUrlResource($link);
     }
 
-    public function redirectUrl(string $hash) // обработать логику если не соответствует такому хэшу
+    public function redirectUrl(string $hash)
     {
         if (!$this->repository->findHash($hash)) {
             abort(404);
