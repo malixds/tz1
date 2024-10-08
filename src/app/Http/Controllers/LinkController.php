@@ -1,0 +1,68 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Exceptions\LinkIsExpired;
+use App\Http\Requests\HashUrlRequest;
+use App\Http\Resources\LinkHashResource;
+use App\Http\Resources\LinkResource;
+use App\Http\Resources\LinkUrlResource;
+use App\Interfaces\ILinkRepository;
+use App\Models\Link;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+
+class LinkController extends Controller
+{
+    public function __construct(private ILinkRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
+     * @throws LinkIsExpired
+     */
+    public function toHash(Request $request) // если она уже есть, то не нужно создавать хэш
+    {
+        $link = $this->repository->firstOrCreate($request->get('url'), [
+            "url" => $request->get('url'),
+            "hash" => Str::random(5)
+        ]);
+        if ($link->isExpired()) {
+            throw new LinkIsExpired(404);
+        }
+        return new LinkHashResource($link);
+    }
+
+    public function getUrl(string $hash) // обработать логику если не соответствует такому хэшу
+    {
+        $link = $this->repository->findHash($hash);
+        if (!$link || $link->isExpired()) {
+            abort(404);
+        }
+        return new LinkUrlResource($link);
+    }
+
+    public function redirectUrl(string $hash) // обработать логику если не соответствует такому хэшу
+    {
+        if (!$this->repository->findHash($hash)) {
+            abort(404);
+        }
+        return redirect($this->getUrl($hash)->url);
+    }
+
+    public function searchUrl(string $url)
+    {
+        $link = $this->repository->firstOrCreate($url, [
+            "url"   => $url,
+            "hash"  => Str::random(5),
+        ]);
+        return new LinkHashResource($link);
+    }
+
+    public function links()
+    {
+        return response()->json(Link::all());
+    }
+}
