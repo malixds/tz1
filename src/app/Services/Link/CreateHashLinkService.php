@@ -25,6 +25,7 @@ class CreateHashLinkService
             "hash" => Str::random(5)
         ]);
         if ($link->isExpired()) {
+            dd('asdasd');
             $link->hash = Str::random(5);
             $link->created_at = now();
             $link->save();

@@ -17,12 +17,12 @@ class LinkSeeder extends Seeder
     public function run(): void
     {
         Link::factory()->create([
-            "url" => "vk.com",
+            "url" => "https://vk.com",
             "hash" => "maxim",
             "created_at" => $this->dates[1],
         ]);
         Link::factory()->create([
-            "url" => "ok.ru",
+            "url" => "https://ok.ru",
             "hash" => "hello",
             "created_at" => $this->dates[0],
         ]);

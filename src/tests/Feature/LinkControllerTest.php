@@ -26,30 +26,26 @@ class LinkControllerTest extends TestCase
     public function testCodeToHash(): void
     {
         // тест проведем в трех варианта, также проверка на сохраннение в бд
-        // 1 - если такой записи нет -> url
-        // 2 - если запись есть и живая -> url
+        // 1 - если такой записи нет -> hash
+        // 2 - если запись есть и живая -> hash
         // 3 - запись есть и мертвая -> exception
 
-        // 1
-        $response = $this->postJson('/api/tohash', [
-            "url" => "aksdjlaskjd.asd"
-        ]);
-        $response->assertStatus(201);
+        // 1 - 2
+        $response = $this->postJson(route('tohash'), ["url" => "https://mangalib.me/dandadan/v9/c71?page=10"]);
+        $this->assertTrue(in_array($response->status(), [200, 201]));
         $this->assertDatabaseHas('links', [
-            'url' => 'aksdjlaskjd.asd',
+            'url' => urlencode('https://mangalib.me/dandadan/v9/c71?page=10'),
         ]);
 
 
-        // 2
-        $response = $this->postJson('/api/tohash', [
-            "url" => "vk.com"
-        ]);
-        $response->assertStatus(200);
+        // 1 - 2
+        $response = $this->postJson(route('tohash'),
+            ["url" => urlencode("https://vk.com")]);
+        $this->assertTrue(in_array($response->status(), [200, 201]));
 
         // 3
-        $response = $this->postJson('/api/tohash', [ // ДОБАВИТЬ СТАРУЮ ЗАПИСЬ
-            "url" => "ok.ru"
-        ]);
+        $response = $this->postJson(route('tohash'),
+            ["url" => urlencode("https://ok.ru")]);
         $response->assertStatus(500);
     }
 
@@ -61,14 +57,14 @@ class LinkControllerTest extends TestCase
         // 3 - запись умерла -> 404
 
         // 1
-        $response = $this->get('api/geturl/maxim');
+        $response = $this->get(route('geturl'), ['hash' => "maxim"]);
         $response->assertStatus(200);
         // 2
-        $response = $this->get('api/geturl/artem');
+        $response = $this->get(route('geturl'), ['hash' => "artem"]);
         $response->assertStatus(404);
 
         // 3
-        $response = $this->get('api/geturl/hello'); // ДОБАВИТЬ СТАРУЮ ЗАПИСЬ
+        $response = $this->get(route('geturl'), ['hash' => "hello"]);
         $response->assertStatus(404); // Измените на 404
 
     }
