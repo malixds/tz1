@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('links', function (Blueprint $table) {
             $table->id();
-            $table->string('url');
+            $table->text('url');
             $table->string('hash');
             $table->boolean('sent')->default(false);
             $table->timestamps();

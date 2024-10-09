@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\LinkController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/tohash', [LinkController::class, 'toHash'])
@@ -13,12 +12,12 @@ Route::get('/geturl/{hash}', [LinkController::class, 'getUrl'])
 Route::get('/redirecturl/{hash}', [LinkController::class, 'redirectUrl'])
     ->name('redirecturl');
 
-Route::get('/searchurl/{url}', [LinkController::class, 'searchUrl'])
+Route::post('/searchurl', [LinkController::class, 'searchUrl'])
     ->name('searchurl');
 
+
+// Гет запрос для просмотра всех ссылок
 Route::get('/links', [LinkController::class, 'links'])
     ->name('links');
-
-//Route::get('/links', [LinkController::class, 'links'])->name('links');
 
 

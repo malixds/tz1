@@ -12,7 +12,6 @@ class CreateHashLinkService
 {
     public function __construct(private ILinkRepository $repository)
     {
-        $this->repository = $repository;
     }
 
     /**
@@ -20,12 +19,16 @@ class CreateHashLinkService
      */
     public function run(string $url): Link
     {
+        $url = urlencode($url);
         $link = $this->repository->firstOrCreate($url,[
             "url" => $url,
             "hash" => Str::random(5)
         ]);
         if ($link->isExpired()) {
-            throw new LinkIsExpired("Ссылка устарела");
+            $link->hash = Str::random(5);
+            $link->created_at = now();
+            $link->save();
+            throw new LinkIsExpired();
         }
         return $link;
     }
