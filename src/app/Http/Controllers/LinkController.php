@@ -13,9 +13,7 @@ use App\Services\Link\CreateHashLinkService;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
-use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class LinkController extends Controller
@@ -88,6 +86,9 @@ class LinkController extends Controller
     public function searchUrl(SearchUrlRequest $request): LinkHashResource
     {
         $link = $this->repository->findUrl(urlencode($request->validated("url")));
+        if (!$link) {
+            abort(404);
+        }
         return new LinkHashResource($link);
     }
 
